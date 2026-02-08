@@ -479,7 +479,7 @@ static void audio_driver_flush(audio_driver_state_t *audio_st,
                audio_st->free_samples_count++ & (AUDIO_BUFFER_FREE_SAMPLES_COUNT - 1);
          int avail                   = (int)audio_st->current_audio->write_avail(
                audio_st->context_audio_data);
-         int half_size               = (int)(audio_st->buffer_size / 2);
+         int half_size               = (int)(audio_st->buffer_size >> 1);
          int delta_mid               = avail - half_size;
          double direction            = (double)delta_mid / half_size;
 
@@ -554,7 +554,7 @@ static void audio_driver_flush(audio_driver_state_t *audio_st,
       {
          int avail                   = (int)audio_st->current_audio->write_avail(
                audio_st->context_audio_data);
-         int half_size               = (int)(audio_st->buffer_size / 2);
+         int half_size               = (int)(audio_st->buffer_size >> 1);
          int delta_mid               = avail - half_size;
          double direction            = (double)delta_mid / half_size;
          double adjust               = 1.0 + audio_st->rate_control_delta * direction;
