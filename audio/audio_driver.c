@@ -1452,6 +1452,8 @@ void audio_driver_load_system_sounds(void)
    struct string_list *list              = NULL;
    struct string_list *list_fallback     = NULL;
    unsigned i                            = 0;
+   unsigned list_index                   = 0;
+   struct string_list *lists[2]          = { NULL, NULL };
 
    if (!audio_enable_menu && !audio_enable_cheevo_unlock)
       goto end;
@@ -1484,45 +1486,44 @@ void audio_driver_load_system_sounds(void)
    if (!list || list->size == 0)
       goto end;
 
-   if (list_fallback && list_fallback->size > 0)
+   lists[0] = list;
+   lists[1] = list_fallback;
+
+   for (list_index = 0; list_index < 2; list_index++)
    {
-      for (i = 0; i < list_fallback->size; i++)
+      struct string_list *current_list = lists[list_index];
+
+      if (!current_list || current_list->size == 0)
+         continue;
+
+      for (i = 0; i < current_list->size; i++)
       {
-         if (list->size == 0 || !string_list_find_elem(list, list_fallback->elems[i].data))
+         const char *path = current_list->elems[i].data;
+         const char *ext  = path_get_extension(path);
+
+         if (audio_driver_mixer_extension_supported(ext))
          {
-            union string_list_elem_attr attr = {0};
-            string_list_append(list, list_fallback->elems[i].data, attr);
+            basename_noext[0] = '\0';
+            fill_pathname(basename_noext, path_basename(path), "",
+                  sizeof(basename_noext));
+
+            if (string_is_equal_noncase(basename_noext, "ok"))
+               path_ok = path;
+            else if (string_is_equal_noncase(basename_noext, "cancel"))
+               path_cancel = path;
+            else if (string_is_equal_noncase(basename_noext, "notice"))
+               path_notice = path;
+            else if (string_is_equal_noncase(basename_noext, "notice_back"))
+               path_notice_back = path;
+            else if (string_is_equal_noncase(basename_noext, "bgm"))
+               path_bgm = path;
+            else if (string_is_equal_noncase(basename_noext, "unlock"))
+               path_cheevo_unlock = path;
+            else if (string_is_equal_noncase(basename_noext, "up"))
+               path_up = path;
+            else if (string_is_equal_noncase(basename_noext, "down"))
+               path_down = path;
          }
-      }
-   }
-
-   for (i = 0; i < list->size; i++)
-   {
-      const char *path = list->elems[i].data;
-      const char *ext  = path_get_extension(path);
-
-      if (audio_driver_mixer_extension_supported(ext))
-      {
-         basename_noext[0] = '\0';
-         fill_pathname(basename_noext, path_basename(path), "",
-               sizeof(basename_noext));
-
-         if (string_is_equal_noncase(basename_noext, "ok"))
-            path_ok = path;
-         else if (string_is_equal_noncase(basename_noext, "cancel"))
-            path_cancel = path;
-         else if (string_is_equal_noncase(basename_noext, "notice"))
-            path_notice = path;
-         else if (string_is_equal_noncase(basename_noext, "notice_back"))
-            path_notice_back = path;
-         else if (string_is_equal_noncase(basename_noext, "bgm"))
-            path_bgm = path;
-         else if (string_is_equal_noncase(basename_noext, "unlock"))
-            path_cheevo_unlock = path;
-         else if (string_is_equal_noncase(basename_noext, "up"))
-            path_up = path;
-         else if (string_is_equal_noncase(basename_noext, "down"))
-            path_down = path;
       }
    }
 
