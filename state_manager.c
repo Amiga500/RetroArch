@@ -307,7 +307,6 @@ static void state_manager_raw_decompress(const void *patch, void *data)
          if (numchanged >= 8)
          {
             size_t blocks = numchanged / 8;
-            size_t remaining = numchanged % 8;
             const __m128i *src = (const __m128i*)patch16;
             __m128i *dst = (__m128i*)out16;
             
