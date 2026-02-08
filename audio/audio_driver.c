@@ -1489,9 +1489,10 @@ void audio_driver_load_system_sounds(void)
    lists[0] = list;
    lists[1] = list_fallback;
 
-   for (list_index = 0; list_index < 2; list_index++)
+   for (list_index = 0; list_index < ARRAY_SIZE(lists); list_index++)
    {
       struct string_list *current_list = lists[list_index];
+      const bool is_primary_list       = list_index == 0;
 
       if (!current_list || current_list->size == 0)
          continue;
@@ -1507,21 +1508,21 @@ void audio_driver_load_system_sounds(void)
             fill_pathname(basename_noext, path_basename(path), "",
                   sizeof(basename_noext));
 
-            if (string_is_equal_noncase(basename_noext, "ok"))
+            if ((is_primary_list || !path_ok) && string_is_equal_noncase(basename_noext, "ok"))
                path_ok = path;
-            else if (string_is_equal_noncase(basename_noext, "cancel"))
+            else if ((is_primary_list || !path_cancel) && string_is_equal_noncase(basename_noext, "cancel"))
                path_cancel = path;
-            else if (string_is_equal_noncase(basename_noext, "notice"))
+            else if ((is_primary_list || !path_notice) && string_is_equal_noncase(basename_noext, "notice"))
                path_notice = path;
-            else if (string_is_equal_noncase(basename_noext, "notice_back"))
+            else if ((is_primary_list || !path_notice_back) && string_is_equal_noncase(basename_noext, "notice_back"))
                path_notice_back = path;
-            else if (string_is_equal_noncase(basename_noext, "bgm"))
+            else if ((is_primary_list || !path_bgm) && string_is_equal_noncase(basename_noext, "bgm"))
                path_bgm = path;
-            else if (string_is_equal_noncase(basename_noext, "unlock"))
+            else if ((is_primary_list || !path_cheevo_unlock) && string_is_equal_noncase(basename_noext, "unlock"))
                path_cheevo_unlock = path;
-            else if (string_is_equal_noncase(basename_noext, "up"))
+            else if ((is_primary_list || !path_up) && string_is_equal_noncase(basename_noext, "up"))
                path_up = path;
-            else if (string_is_equal_noncase(basename_noext, "down"))
+            else if ((is_primary_list || !path_down) && string_is_equal_noncase(basename_noext, "down"))
                path_down = path;
          }
       }
