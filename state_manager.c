@@ -300,9 +300,45 @@ static void state_manager_raw_decompress(const void *patch, void *data)
           * constant-per-call overhead that actually shows up.
           *
           * Our average size in here seems to be 8 or something.
-          * Therefore, we do something with lower overhead. */
-         for (i = 0; i < numchanged; i++)
-            out16[i]  = patch16[i];
+          * Therefore, we do something with lower overhead.
+          * Loop unrolling for common small sizes. */
+#if defined(__SSE2__) && !defined(NO_UNALIGNED_MEM)
+         /* Use SSE2 for blocks of 8 or more uint16_t (16 bytes) */
+         if (numchanged >= 8)
+         {
+            size_t blocks = numchanged / 8;
+            size_t remaining = numchanged % 8;
+            const __m128i *src = (const __m128i*)patch16;
+            __m128i *dst = (__m128i*)out16;
+            
+            for (i = 0; i < blocks; i++)
+               _mm_storeu_si128(&dst[i], _mm_loadu_si128(&src[i]));
+            
+            /* Handle remaining elements */
+            for (i = blocks * 8; i < numchanged; i++)
+               out16[i] = patch16[i];
+         }
+         else
+#endif
+         {
+            /* Unroll loop for common small sizes */
+            switch (numchanged)
+            {
+               case 8:  out16[7] = patch16[7];
+               case 7:  out16[6] = patch16[6];
+               case 6:  out16[5] = patch16[5];
+               case 5:  out16[4] = patch16[4];
+               case 4:  out16[3] = patch16[3];
+               case 3:  out16[2] = patch16[2];
+               case 2:  out16[1] = patch16[1];
+               case 1:  out16[0] = patch16[0];
+                        break;
+               default:
+                        for (i = 0; i < numchanged; i++)
+                           out16[i] = patch16[i];
+                        break;
+            }
+         }
 
          patch16     += numchanged;
          out16       += numchanged;
