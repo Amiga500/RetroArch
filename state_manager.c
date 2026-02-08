@@ -320,16 +320,18 @@ static void state_manager_raw_decompress(const void *patch, void *data)
          else
 #endif
          {
-            /* Unroll loop for common small sizes */
+            /* Unroll loop for common small sizes using intentional fall-through
+             * (Duff's device pattern): when numchanged==8, copies all 8 elements
+             * by falling through cases 8->7->6->5->4->3->2->1 */
             switch (numchanged)
             {
-               case 8:  out16[7] = patch16[7];
-               case 7:  out16[6] = patch16[6];
-               case 6:  out16[5] = patch16[5];
-               case 5:  out16[4] = patch16[4];
-               case 4:  out16[3] = patch16[3];
-               case 3:  out16[2] = patch16[2];
-               case 2:  out16[1] = patch16[1];
+               case 8:  out16[7] = patch16[7];  /* fall through */
+               case 7:  out16[6] = patch16[6];  /* fall through */
+               case 6:  out16[5] = patch16[5];  /* fall through */
+               case 5:  out16[4] = patch16[4];  /* fall through */
+               case 4:  out16[3] = patch16[3];  /* fall through */
+               case 3:  out16[2] = patch16[2];  /* fall through */
+               case 2:  out16[1] = patch16[1];  /* fall through */
                case 1:  out16[0] = patch16[0];
                         break;
                default:
